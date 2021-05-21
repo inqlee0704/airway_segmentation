@@ -1,0 +1,6 @@
+# Global
+*.ipynb
+
+# Train
+train/RESULTS
+train/monits
