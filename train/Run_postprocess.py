@@ -6,7 +6,7 @@ from medpy.io import load,save
 import SimpleITK as sitk
 sitk.ProcessObject_SetGlobalWarningDisplay(False)
 import gzip
-import shutil
+import shutil   
 import time
 import numpy as np
 
