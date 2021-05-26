@@ -48,21 +48,25 @@ class CFG:
         self.valid_bs = 32
         self.test_results_dir = "RESULTS"
         self.mask = 'airway'
-        self.save = True
+        self.save = False
+        self.debug = True
 
 if __name__ == "__main__": 
     seed_everything()
     start = time.time()
 
     c = CFG()
-    n_case=256
+    #n_case=256
     print('***********************************************************')
     print('Configuration: ')
     print(c.__dict__)
-    print(f'n_case: {n_case}')
     print('***********************************************************')
     # Data
-    train_loader, valid_loader = prep_dataloader(c,n_case=256)
+    if c.debug: # only use 10 cases, 1 epoch
+        train_loader, valid_loader = prep_dataloader(c,n_case=10)
+        c.epochs = 1
+    else:
+        train_loader, valid_loader = prep_dataloader(c)
     # Model
     model = get_model(c)
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
