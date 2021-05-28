@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.insert(0,'/data1/inqlee0704/DL_code')
+sys.path.insert(0,'../../DL_code')
 import pandas as pd
 from medpy.io import load,save
 import SimpleITK as sitk

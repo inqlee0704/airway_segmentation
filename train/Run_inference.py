@@ -1,6 +1,5 @@
 import sys
-sys.path.insert(0,'/data1/inqlee0704/DL_code')
-# sys.path.insert(0,'/data1/inqlee0704/DL_code')
+sys.path.insert(0,'../../DL_code')
 import torch
 import pandas as pd
 from inference import run_inference

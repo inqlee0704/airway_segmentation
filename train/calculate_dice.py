@@ -1,11 +1,8 @@
 import sys
-sys.path.insert(0,'/data1/inqlee0704/DL_code')
+sys.path.insert(0,'../../DL_code')
 import os
-import torch
 import pandas as pd
 import numpy as np
-from inference import run_inference
-from model_util import RecursiveUNet
 from metrics_util import Dice3d
 from medpy.io import load
 import time

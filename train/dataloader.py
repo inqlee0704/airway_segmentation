@@ -23,7 +23,7 @@ from sklearn import model_selection
 ImageDataset for image classification
 Inputs:
     - img_paths: image paths [list]
-    - targets: labels [list]
+    - targets:´ labels [list]
 Outputs:
     - dictionary that containts both image tensor & target tensor [dict]
 """

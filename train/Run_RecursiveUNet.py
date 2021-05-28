@@ -2,7 +2,7 @@ import os
 import time
 import random
 import sys
-sys.path.insert(0,'/data1/inqlee0704/DL_code')
+sys.path.insert(0,'../../DL_code')
 
 from model_util import get_model
 from train_util import *
@@ -11,14 +11,9 @@ from dataloader import prep_dataloader
 
 
 import numpy as np
-import pandas as pd
 from torch import nn
 from torch.cuda import amp
-import torch.optim as optim
 import torch
-from torch.utils.data import DataLoader
-from sklearn import metrics, model_selection
-from medpy.io import load
 import SimpleITK as sitk
 sitk.ProcessObject_SetGlobalWarningDisplay(False)
 
@@ -90,7 +85,7 @@ if __name__ == "__main__":
         dirname = f'{c.name}_{time.strftime("%Y%m%d", time.gmtime())}'
         out_dir = os.path.join('RESULTS',dirname)
         os.makedirs(out_dir, exist_ok=True)
-        path = os.path.join(out_dir, "model.pth")
+        path = os.path.join(out_dir, "airway_UNet.pth")
 
     best_loss = np.inf
     best_dice = 0
@@ -109,7 +104,8 @@ if __name__ == "__main__":
        #          torch.save(model.state_dict(), path)
         if val_loss < best_loss:
             best_loss = val_loss
-            print('Best loss:' , best_loss)
+            best_dice = val_dice
+            print(f'Best loss: {best_loss} with {best_dice}')
             if c.save:
                 torch.save(model.state_dict(), path)
 
