@@ -1,5 +1,6 @@
 # Global
 *.ipynb
+.env
 
 # Train
 train/RESULTS

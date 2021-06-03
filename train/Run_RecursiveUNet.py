@@ -1,4 +1,5 @@
 import os
+from dotenv import dotenv_values
 import time
 import random
 import sys
@@ -17,6 +18,8 @@ import torch
 import SimpleITK as sitk
 sitk.ProcessObject_SetGlobalWarningDisplay(False)
 
+
+
 def seed_everything(seed=42):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -26,8 +29,15 @@ def seed_everything(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = True
 
+
 class CFG:
+    
     def __init__(self):
+        self.ENV = dotenv_values('../.env')
+
+        self.data_path = self.ENV['VIDA_PATH']
+        # self.data_path = r"/data4/inqlee0704"
+
         self.name = "Recursive_UNet_CE_4downs"
         self.model = 'RecursiveUNet' # ['UNet', 'RecursiveUNet']
         self.optimizer = 'adam' # ['adam', 'adamp']
@@ -35,7 +45,7 @@ class CFG:
         # ['CosineAnnealingWarmRestarts', 'CosineAnnealingLR', 'ReduceLROnPlateau']
         self.epochs = 40 
         self.T_0 = self.epochs
-        self.root_path = r"/data4/inqlee0704"
+
         self.in_file = 'ENV18PM_ProjSubjList_cleaned_IN.in'
         self.lr = 0.0001
         self.min_lr = 1e-6

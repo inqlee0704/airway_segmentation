@@ -15,6 +15,7 @@ infer_path = r"/data4/inqlee0704/ENV18PM_ProjSubjList_IN_Inference.in"
 # parameter_path = '/home/inqlee0704/airway2/RESULTS/Recursive_UNet_CE_4downs_20210310/model.pth'
 # parameter_path = '/home/inqlee0704/airway2/RESULTS/Recursive_UNet_CE_4downs_20210314/model.pth'
 # n_case=256
+# parameter_path = '/home/inqlee0704/airway2/RESULTS/Recursive_UNet_CE_4downs_20210317/model.pth'
 parameter_path = '/home/inqlee0704/airway2/RESULTS/Recursive_UNet_CE_4downs_20210317/model.pth'
 infer_list = pd.read_csv(infer_path,sep='\t')
 
