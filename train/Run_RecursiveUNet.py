@@ -1,5 +1,5 @@
 import os
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 import time
 import random
 import sys
@@ -33,9 +33,7 @@ def seed_everything(seed=42):
 class CFG:
     
     def __init__(self):
-        self.ENV = dotenv_values('../.env')
-
-        self.data_path = self.ENV['VIDA_PATH']
+        self.data_path = os.getenv('VIDA_PATH')
         # self.data_path = r"/data4/inqlee0704"
 
         self.name = "Recursive_UNet_CE_4downs"
@@ -57,6 +55,7 @@ class CFG:
         self.debug = True
 
 if __name__ == "__main__": 
+    load_dotenv()
     seed_everything()
     start = time.time()
 
