@@ -34,14 +34,12 @@ class CFG:
     
     def __init__(self):
         self.data_path = os.getenv('VIDA_PATH')
-        # self.data_path = r"/data4/inqlee0704"
-
-        self.name = "Recursive_UNet_CE_4downs"
+        self.name = "UNet_baseline"
         self.model = 'RecursiveUNet' # ['UNet', 'RecursiveUNet']
         self.optimizer = 'adam' # ['adam', 'adamp']
         self.scheduler = 'CosineAnnealingWarmRestarts' 
         # ['CosineAnnealingWarmRestarts', 'CosineAnnealingLR', 'ReduceLROnPlateau']
-        self.epochs = 40 
+        self.epochs = 30
         self.T_0 = self.epochs
 
         self.in_file = 'ENV18PM_ProjSubjList_cleaned_IN.in'
@@ -51,8 +49,8 @@ class CFG:
         self.valid_bs = 32
         self.test_results_dir = "RESULTS"
         self.mask = 'airway'
-        self.save = False
-        self.debug = True
+        self.save = True
+        self.debug = False
 
 if __name__ == "__main__": 
     load_dotenv()
@@ -60,7 +58,7 @@ if __name__ == "__main__":
     start = time.time()
 
     c = CFG()
-    #n_case=256
+    n_case = 64
     print('***********************************************************')
     print('Configuration: ')
     print(c.__dict__)
@@ -102,7 +100,8 @@ if __name__ == "__main__":
     for epoch in range(c.epochs):
         trn_loss, trn_dice = eng.train(train_loader)
         val_loss, val_dice = eng.evaluate(valid_loader)
-        scheduler.step(val_loss)
+        if c.scheduler == 'ReduceLROnPlateau':
+            scheduler.step(val_loss)
         eng.epoch += 1
         print(f'Epoch: {epoch}, train loss: {trn_loss:5f}, valid loss: {val_loss:5f}')
         print(f'Epoch: {epoch}, train dice: {trn_dice:5f}, valid dice: {val_dice:5f}')
