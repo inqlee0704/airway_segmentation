@@ -1,0 +1,83 @@
+2021-08-05 14:32:50,958 INFO    MainThread:106553 [internal.py:wandb_internal():91] W&B internal server running at pid: 106553, started at: 2021-08-05 14:32:50.958215
+2021-08-05 14:32:50,960 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: check_version
+2021-08-05 14:32:50,960 INFO    WriterThread:106553 [datastore.py:open_for_write():80] open: /data1/inqlee0704/airway_segmentation/train/wandb/run-20210805_143250-2tielr12/run-2tielr12.wandb
+2021-08-05 14:32:50,963 DEBUG   SenderThread:106553 [sender.py:send():179] send: header
+2021-08-05 14:32:50,963 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: check_version
+2021-08-05 14:32:51,189 DEBUG   SenderThread:106553 [sender.py:send():179] send: run
+2021-08-05 14:32:51,585 INFO    SenderThread:106553 [dir_watcher.py:__init__():168] watching files in: /data1/inqlee0704/airway_segmentation/train/wandb/run-20210805_143250-2tielr12/files
+2021-08-05 14:32:51,586 INFO    SenderThread:106553 [sender.py:_start_run_threads():719] run started: 2tielr12 with start time 1628188370
+2021-08-05 14:32:51,586 DEBUG   SenderThread:106553 [sender.py:send():179] send: summary
+2021-08-05 14:32:51,586 INFO    SenderThread:106553 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-08-05 14:32:51,586 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: run_start
+2021-08-05 14:32:52,587 INFO    Thread-8  :106553 [dir_watcher.py:_on_file_created():216] file/dir created: /data1/inqlee0704/airway_segmentation/train/wandb/run-20210805_143250-2tielr12/files/wandb-summary.json
+2021-08-05 14:32:53,623 DEBUG   HandlerThread:106553 [meta.py:__init__():39] meta init
+2021-08-05 14:32:53,623 DEBUG   HandlerThread:106553 [meta.py:__init__():53] meta init done
+2021-08-05 14:32:53,623 DEBUG   HandlerThread:106553 [meta.py:probe():210] probe
+2021-08-05 14:32:53,629 DEBUG   HandlerThread:106553 [meta.py:_setup_git():200] setup git
+2021-08-05 14:32:53,653 DEBUG   HandlerThread:106553 [meta.py:_setup_git():207] setup git done
+2021-08-05 14:32:53,653 DEBUG   HandlerThread:106553 [meta.py:_save_pip():57] save pip
+2021-08-05 14:32:53,654 DEBUG   HandlerThread:106553 [meta.py:_save_pip():71] save pip done
+2021-08-05 14:32:53,654 DEBUG   HandlerThread:106553 [meta.py:_save_conda():78] save conda
+2021-08-05 14:32:54,216 DEBUG   HandlerThread:106553 [meta.py:_save_conda():86] save conda done
+2021-08-05 14:32:54,216 DEBUG   HandlerThread:106553 [meta.py:probe():252] probe done
+2021-08-05 14:32:54,221 DEBUG   SenderThread:106553 [sender.py:send():179] send: files
+2021-08-05 14:32:54,222 INFO    SenderThread:106553 [sender.py:_save_file():841] saving file wandb-metadata.json with policy now
+2021-08-05 14:32:54,227 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:32:54,227 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:32:54,232 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: pause
+2021-08-05 14:32:54,232 INFO    HandlerThread:106553 [handler.py:handle_request_pause():545] stopping system metrics thread
+2021-08-05 14:32:54,563 DEBUG   SenderThread:106553 [sender.py:send():179] send: stats
+2021-08-05 14:32:54,591 INFO    Thread-8  :106553 [dir_watcher.py:_on_file_created():216] file/dir created: /data1/inqlee0704/airway_segmentation/train/wandb/run-20210805_143250-2tielr12/files/output.log
+2021-08-05 14:32:54,592 INFO    Thread-8  :106553 [dir_watcher.py:_on_file_created():216] file/dir created: /data1/inqlee0704/airway_segmentation/train/wandb/run-20210805_143250-2tielr12/files/wandb-metadata.json
+2021-08-05 14:32:54,592 INFO    Thread-8  :106553 [dir_watcher.py:_on_file_created():216] file/dir created: /data1/inqlee0704/airway_segmentation/train/wandb/run-20210805_143250-2tielr12/files/requirements.txt
+2021-08-05 14:32:54,592 INFO    Thread-8  :106553 [dir_watcher.py:_on_file_created():216] file/dir created: /data1/inqlee0704/airway_segmentation/train/wandb/run-20210805_143250-2tielr12/files/conda-environment.yaml
+2021-08-05 14:32:55,127 INFO    Thread-11 :106553 [upload_job.py:push():137] Uploaded file /tmp/tmp5_5ynr5qwandb/1iahpxr3-wandb-metadata.json
+2021-08-05 14:33:03,584 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: resume
+2021-08-05 14:33:03,584 INFO    HandlerThread:106553 [handler.py:handle_request_resume():540] starting system metrics thread
+2021-08-05 14:33:03,585 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: pause
+2021-08-05 14:33:03,585 INFO    HandlerThread:106553 [handler.py:handle_request_pause():545] stopping system metrics thread
+2021-08-05 14:33:03,630 DEBUG   SenderThread:106553 [sender.py:send():179] send: stats
+2021-08-05 14:33:04,603 INFO    Thread-8  :106553 [dir_watcher.py:_on_file_modified():229] file/dir modified: /data1/inqlee0704/airway_segmentation/train/wandb/run-20210805_143250-2tielr12/files/output.log
+2021-08-05 14:33:05,320 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: resume
+2021-08-05 14:33:05,320 INFO    HandlerThread:106553 [handler.py:handle_request_resume():540] starting system metrics thread
+2021-08-05 14:33:05,320 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: pause
+2021-08-05 14:33:05,320 INFO    HandlerThread:106553 [handler.py:handle_request_pause():545] stopping system metrics thread
+2021-08-05 14:33:05,364 DEBUG   SenderThread:106553 [sender.py:send():179] send: stats
+2021-08-05 14:33:09,564 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:33:09,565 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:33:24,909 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:33:24,909 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:33:40,255 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:33:40,255 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:33:55,606 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:33:55,606 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:34:10,952 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:34:10,952 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:34:26,289 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:34:26,289 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:34:41,620 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:34:41,621 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:34:56,960 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:34:56,960 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:35:12,309 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:35:12,309 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:35:27,665 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:35:27,665 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:35:42,997 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:35:42,997 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:35:58,343 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:35:58,343 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:36:02,134 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: resume
+2021-08-05 14:36:02,134 INFO    HandlerThread:106553 [handler.py:handle_request_resume():540] starting system metrics thread
+2021-08-05 14:36:02,136 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: pause
+2021-08-05 14:36:02,136 INFO    HandlerThread:106553 [handler.py:handle_request_pause():545] stopping system metrics thread
+2021-08-05 14:36:02,183 DEBUG   SenderThread:106553 [sender.py:send():179] send: stats
+2021-08-05 14:36:02,784 INFO    Thread-8  :106553 [dir_watcher.py:_on_file_modified():229] file/dir modified: /data1/inqlee0704/airway_segmentation/train/wandb/run-20210805_143250-2tielr12/files/output.log
+2021-08-05 14:36:13,681 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:36:13,682 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:36:29,027 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:36:29,028 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:36:44,366 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:36:44,366 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status
+2021-08-05 14:36:59,698 DEBUG   HandlerThread:106553 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-05 14:36:59,698 DEBUG   SenderThread:106553 [sender.py:send_request():193] send_request: stop_status

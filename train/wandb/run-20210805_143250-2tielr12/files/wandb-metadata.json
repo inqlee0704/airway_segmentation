@@ -1,0 +1,26 @@
+{
+    "os": "Linux-3.10.0-1127.18.2.el7.x86_64-x86_64-with-centos-7.8.2003-Core",
+    "python": "3.7.9",
+    "heartbeatAt": "2021-08-05T18:32:53.623525",
+    "startedAt": "2021-08-05T18:32:50.056165",
+    "docker": null,
+    "gpu": "Quadro RTX 5000",
+    "gpu_count": 1,
+    "cpu_count": 36,
+    "cuda": null,
+    "args": [
+        "-f",
+        "/home/inqlee0704/.local/share/jupyter/runtime/kernel-b4a5d69f-6df4-487d-91a3-2da2c2bfc1d1.json"
+    ],
+    "state": "running",
+    "program": "<python with no main file>",
+    "git": {
+        "remote": "https://github.com/inqlee0704/airway_segmentation.git",
+        "commit": "8962edfa40289b47c67ade3daa868c02953b0acf"
+    },
+    "email": "inqlee0704@gmail.com",
+    "root": "/data1/inqlee0704/airway_segmentation",
+    "host": "b2",
+    "username": "inqlee0704",
+    "executable": "/home/inqlee0704/anaconda3/envs/py37/bin/python"
+}

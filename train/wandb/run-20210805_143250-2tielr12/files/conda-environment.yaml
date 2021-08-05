@@ -1,0 +1,6 @@
+name: py37
+channels:
+  - /opt/intel/oneapi/conda_channel
+  - intel
+  - defaults
+prefix: /home/inqlee0704/.conda/envs/py37
