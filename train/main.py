@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import time
 import random
+import wandb
 
 from UNet import RecursiveUNet
 from engine import Segmentor
@@ -14,6 +15,9 @@ from torch.cuda import amp
 import torch
 import SimpleITK as sitk
 sitk.ProcessObject_SetGlobalWarningDisplay(False)
+
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 
 def seed_everything(seed=42):
@@ -48,10 +52,20 @@ class CFG:
         self.save = False
         self.debug = True
 
+def wandb_config():
+    config = wandb.config
+    config.model = 'UNet'
+    config.activation = 'ELU'
+    config.optimizer = 'adam'
+    config.scheduler = 'CosineAnnealingWarmRestarts'
+    config.learning_rate = 0.0001
+    return config
+
 if __name__ == "__main__": 
     load_dotenv()
     seed_everything()
-    start = time.time()
+    wandb.init(project='airway')
+    config = wandb_config()
 
     c = CFG()
     n_case = 64
@@ -62,8 +76,8 @@ if __name__ == "__main__":
     
     # Data
     if c.debug: # only use 10 cases, 1 epoch
-        train_loader, valid_loader = prep_dataloader(c,n_case=10)
-        c.epochs = 1
+        train_loader, valid_loader = prep_dataloader(c,n_case=5)
+        c.epochs = 2
     else:
         train_loader, valid_loader = prep_dataloader(c,n_case=n_case)
 
@@ -96,9 +110,12 @@ if __name__ == "__main__":
     best_loss = np.inf
     best_dice = 0
     # Train
+    wandb.watch(eng.model,log='all',log_freq=10)
     for epoch in range(c.epochs):
         trn_loss, trn_dice = eng.train(train_loader)
         val_loss, val_dice = eng.evaluate(valid_loader)
+        wandb.log({'epoch': epoch, 'trn_loss': trn_loss, 'val_loss': val_loss,
+                    'trn_dice': trn_dice, 'val_dice': val_dice})
         if c.scheduler == 'ReduceLROnPlateau':
             scheduler.step(val_loss)
         eng.epoch += 1
@@ -115,6 +132,3 @@ if __name__ == "__main__":
             print(f'Best loss: {best_loss} with {best_dice}')
             if c.save:
                 torch.save(model.state_dict(), path)
-
-    end = time.time()
-    print('Elapsed time: ' + str(end-start))
