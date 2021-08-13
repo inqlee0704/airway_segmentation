@@ -32,10 +32,14 @@ class Segmentor:
         for step, batch in pbar:
             self.optimizer.zero_grad()
             inputs = batch['image'].to(self.device,dtype=torch.float)
-            targets = batch['seg'].to(self.device)
+            # if BCEwithLogitsLoss,
+            targets = batch['seg'].to(self.device, dtype=torch.float)
+            # if CrossEntropyLoss,
+            # targets = batch['seg'].to(self.device)
             with amp.autocast():
                 outputs = self.model(inputs)
-                loss = self.loss_fn(outputs, targets[:, 0, :, :])
+                # loss = self.loss_fn(outputs, targets[:, 0, :, :])
+                loss = self.loss_fn(outputs, targets)
             preds = np.argmax(outputs.cpu().detach().numpy(),axis=1)
             targets = targets.cpu().detach().numpy()
             targets = np.squeeze(targets,axis=1)
@@ -62,9 +66,12 @@ class Segmentor:
         with torch.no_grad():
             for step, batch in pbar:
                 inputs = batch['image'].to(self.device,dtype=torch.float)
+                # if BCEwithLogitsLoss,
+                targets = batch['seg'].to(self.device, dtype=torch.float)
+                # if CrossEntropyLoss,
+                # targets = batch['seg'].to(self.device)
                 outputs = self.model(inputs)
-                targets = batch['seg'].to(self.device)
-                loss = self.loss_fn(outputs, targets[:, 0, :, :])
+                loss = self.loss_fn(outputs, targets)
                 epoch_loss += loss.item()
                 preds = np.argmax(outputs.cpu().detach().numpy(),axis=1)
                 targets = targets.cpu().detach().numpy()

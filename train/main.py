@@ -43,13 +43,14 @@ def wandb_config():
     config.activation = 'relu'
     config.optimizer = 'adam'
     config.scheduler = 'CosineAnnealingWarmRestarts'
+    config.loss = 'BCE'
 
     config.learning_rate = 0.0001
     config.train_bs = 16
     config.valid_bs = 32
 
-    config.save = True
-    config.debug = False
+    config.save = False
+    config.debug = True
     if config.debug:
         config.epochs = 1
     else:
@@ -59,7 +60,7 @@ def wandb_config():
 if __name__ == "__main__": 
     load_dotenv()
     seed_everything()
-    wandb.init(project='airway')
+    wandb.init(project='debug')
     config = wandb_config()
     
     # Data
@@ -78,9 +79,16 @@ if __name__ == "__main__":
     elif config.activation == 'leakyrelu':
         activation_layer = nn.LeakyReLU(inplace=True)
 
-    model = RecursiveUNet(activation=activation_layer)
+    # loss 
+    if config.loss == 'BCE':
+        pos_weight=torch.ones([1])*588
+        loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight.to(config.device))
+    else:
+        loss_fn = nn.CrossEntropyLoss()
+
+
+    model = RecursiveUNet(num_classes=1,activation=activation_layer)
     model.to(config.device)
-    loss_function = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(),lr=config.learning_rate)
     scheduler = CosineAnnealingWarmRestarts(optimizer, 
                                                 T_0=config.epochs, 
@@ -92,7 +100,7 @@ if __name__ == "__main__":
     eng = Segmentor(model=model, 
                     optimizer=optimizer,
                     scheduler=scheduler,
-                    loss_fn=loss_function,
+                    loss_fn=loss_fn,
                     device=config.device,
                     scaler=scaler)
 
