@@ -19,6 +19,8 @@ import matplotlib as mpl
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
 from sklearn import model_selection
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 """
 ImageDataset for image classification
 Inputs:
@@ -90,33 +92,33 @@ class SegDataset:
             self.img,_ = load(self.img_paths[slc[0]])
             self.mask,_ = load(self.mask_paths[slc[0]])
             self.pat_num = slc[0]
-        slc_img = self.img[:,:,slc[1]]
-        slc_mask = self.mask[:,:,slc[1]]
-        slc_img = (slc_img-np.min(slc_img))/(np.max(slc_img)-np.min(slc_img))
-        # slc_img = (slc_img-(-1250))/((250)-(-1250))
+        img = self.img[:,:,slc[1]]
+        mask = self.mask[:,:,slc[1]]
+        img = (img-np.min(img))/(np.max(img)-np.min(img))
+        # img = (img-(-1250))/((250)-(-1250))
         # Airway mask is stored as 255
         if self.mask_name=='airway':
-            slc_mask = slc_mask/255
+            mask = mask/255
         elif self.mask_name=='lung':
-            slc_mask[slc_mask==20] = 1
-            slc_mask[slc_mask==30] = 1
+            mask[mask==20] = 1
+            mask[mask==30] = 1
         else:
             print('Specify mask_name (airway or lung)')
             return -1
-        slc_mask = slc_mask.astype(int)
-        slc_img = slc_img[None,:]
-        slc_mask = slc_mask[None,:]
+        mask = mask.astype(int)
+        img = img[None,:]
+        mask = mask[None,:]
         if self.resize is not None:
             img = cv2.resize(img,
                             (self.resize[1], self.resize[0]),
                              interpolation=cv2.INTER_CUBIC)
         if self.augmentations is not None:
-            augmented = self.augmentations(img=img)
-            img = augmented['img']
+            augmented = self.augmentations(image=img,mask=mask)
+            img,mask = augmented['image'], augmented['mask']
 
         return {
-                'image': torch.tensor(slc_img),
-                'seg': torch.tensor(slc_mask)
+                'image': torch.tensor(img.copy()),
+                'seg': torch.tensor(mask.copy())
                 }
 """
 ImageDataset for 3D semantic segmentation
@@ -277,7 +279,10 @@ def prep_dataloader(c,n_case=0,LOAD_ALL=False):
     else:
         train_slices = slice_loader(df_train)
         valid_slices = slice_loader(df_valid)
-        train_ds = SegDataset(df_train, train_slices, mask_name=c.mask)
+        train_ds = SegDataset(df_train,
+                              train_slices,
+                              mask_name=c.mask,
+                              augmentations=get_train_aug())
         valid_ds = SegDataset(df_valid, valid_slices, mask_name=c.mask)
         train_loader = DataLoader(train_ds,
                                   batch_size=c.train_bs,
@@ -289,3 +294,26 @@ def prep_dataloader(c,n_case=0,LOAD_ALL=False):
                                   num_workers=0)
 
     return train_loader, valid_loader
+
+def get_train_aug():
+    return A.Compose([
+        A.Rotate(limit=10),
+        A.OneOf([
+            A.HorizontalFlip(),
+            A.VerticalFlip(),
+        ],p=0.5),
+        A.OneOf([
+            A.Blur(blur_limit=5),
+            A.MotionBlur(blur_limit=7),
+            A.GaussianBlur(blur_limit=(3,7)),
+        ],p=0.5),
+        # ToTensorV2()
+    ])
+
+# def get_valid_aug():
+#     return A.Compose([
+#         A.OneOf([
+#             A.HorizontalFlip(),
+#             A.VerticalFlip(),
+#         ],p=0.4),
+#     ])
