@@ -6,11 +6,23 @@ import numpy as np
 
 
 def Dice3d(a,b):
+    # print(f'pred shape: {a.shape}')
+    # print(f'target shape: {b.shape}')
     intersection =  np.sum((a!=0)*(b!=0))
     volume = np.sum(a!=0) + np.sum(b!=0)
     if volume == 0:
         return -1
     return 2.*float(intersection)/float(volume)
+
+def dice_loss(pred, target, smooth = 1.):
+    pred = pred.contiguous()
+    target = target.contiguous()    
+
+    intersection = (pred * target).sum(dim=2).sum(dim=2)
+    
+    loss = (1 - ((2. * intersection + smooth) / (pred.sum(dim=2).sum(dim=2) + target.sum(dim=2).sum(dim=2) + smooth)))
+    
+    return loss.mean()
 
 class Segmentor:
     def __init__(self,model,optimizer,scheduler,loss_fn,device,scaler):
@@ -40,9 +52,13 @@ class Segmentor:
                 outputs = self.model(inputs)
                 # loss = self.loss_fn(outputs, targets[:, 0, :, :])
                 loss = self.loss_fn(outputs, targets)
-            preds = np.argmax(outputs.cpu().detach().numpy(),axis=1)
+            # preds = np.argmax(outputs.cpu().detach().numpy(),axis=1)
+            outputs = torch.sigmoid(outputs)
+            preds = np.round(outputs.cpu().detach().numpy())
+            preds = np.squeeze(preds, axis=1)
             targets = targets.cpu().detach().numpy()
             targets = np.squeeze(targets,axis=1)
+
             dice = Dice3d(preds,targets)
             self.scaler.scale(loss).backward()
             self.scaler.step(self.optimizer)
@@ -53,7 +69,7 @@ class Segmentor:
                 skip += 1
             else:
                 epoch_dice += dice
-            pbar.set_description(f'loss:{loss:.2f}, dice:{dice:.4f}') 
+            pbar.set_description(f'loss:{loss:.3f}, dice:{dice:.3f}') 
         return epoch_loss/iters, epoch_dice/(iters-skip)
 
     def evaluate(self, data_loader):
@@ -73,7 +89,10 @@ class Segmentor:
                 outputs = self.model(inputs)
                 loss = self.loss_fn(outputs, targets)
                 epoch_loss += loss.item()
-                preds = np.argmax(outputs.cpu().detach().numpy(),axis=1)
+                # preds = np.argmax(outputs.cpu().detach().numpy(),axis=1)
+                outputs = torch.sigmoid(outputs)
+                preds = np.round(outputs.cpu().detach().numpy())
+                preds = np.squeeze(preds, axis=1)
                 targets = targets.cpu().detach().numpy()
                 targets = np.squeeze(targets,axis=1)
                 dice = Dice3d(preds,targets)
@@ -81,5 +100,5 @@ class Segmentor:
                     skip += 1
                 else:
                     epoch_dice += dice
-                pbar.set_description(f'loss:{loss:.2f}, dice:{dice:.4f}') 
+                pbar.set_description(f'loss:{loss:.3f}, dice:{dice:.3f}') 
             return epoch_loss/iters, epoch_dice/(iters-skip)

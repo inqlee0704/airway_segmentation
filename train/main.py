@@ -44,16 +44,17 @@ def wandb_config():
     config.optimizer = 'adam'
     config.scheduler = 'CosineAnnealingWarmRestarts'
     config.loss = 'BCE'
-    config.pose_weight = 2
+    config.pos_weight = 1
 
     config.learning_rate = 0.0001
     config.train_bs = 16
     config.valid_bs = 32
+    config.aug = True
 
-    config.save = False
-    config.debug = True
+    config.save = True
+    config.debug = False
     if config.debug:
-        config.epochs = 5
+        config.epochs = 1
     else:
         config.epochs = 30
     return config
@@ -61,7 +62,7 @@ def wandb_config():
 if __name__ == "__main__": 
     load_dotenv()
     seed_everything()
-    wandb.init(project='debug')
+    wandb.init(project='airway')
     config = wandb_config()
     
     # Data
@@ -82,7 +83,7 @@ if __name__ == "__main__":
 
     # loss 
     if config.loss == 'BCE':
-        pos_weight=torch.ones([1])*config.pose_weight
+        pos_weight=torch.ones([1])*config.pos_weight
         loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight.to(config.device))
     else:
         loss_fn = nn.CrossEntropyLoss()
