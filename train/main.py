@@ -37,12 +37,12 @@ def wandb_config():
     config.data_path = os.getenv('VIDA_PATH')
     config.in_file = 'ENV18PM_ProjSubjList_cleaned_IN.in'
     config.test_results_dir = "RESULTS"
-    config.name = 'UNet_baseline_relu'
+    config.name = 'UNet_resnet'
     config.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     config.mask = 'airway'
     config.model = 'UNet'
-    config.encoder = 'resnet34'
+    config.encoder = 'timm-efficientnet-b4'
     config.activation = 'relu'
     config.optimizer = 'adam'
     config.scheduler = 'CosineAnnealingWarmRestarts'
@@ -50,12 +50,12 @@ def wandb_config():
     config.pos_weight = 1
 
     config.learning_rate = 0.0001
-    config.train_bs = 32
-    config.valid_bs = 64
+    config.train_bs = 16
+    config.valid_bs = 32
     config.aug = True
 
-    config.save = True
-    config.debug = False
+    config.save = False
+    config.debug = True 
     if config.debug:
         config.epochs = 1
         config.project = 'debug'
@@ -95,7 +95,8 @@ if __name__ == "__main__":
         loss_fn = nn.CrossEntropyLoss()
 
     # model = RecursiveUNet(num_classes=1,activation=activation_layer)
-    model = smp.Unet(config.encoder, in_channels=1)
+    # model = smp.Unet(config.encoder, in_channels=1)
+    model = smp.FPN(config.encoder, in_channels=1)
 
     model.to(config.device)
     optimizer = torch.optim.Adam(model.parameters(),lr=config.learning_rate)
