@@ -41,11 +41,11 @@ def cal_loss(outputs, targets, bce_weight=0.5):
     return loss, bce_loss, dice_loss
 
 class Segmentor:
-    def __init__(self,model,optimizer,scheduler,loss_fn,device,scaler):
+    def __init__(self,model,optimizer,scheduler,device,scaler):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
-        self.loss_fn = loss_fn
+        # self.loss_fn = loss_fn
         self.device = device
         self.scaler = scaler
         self.epoch = 0

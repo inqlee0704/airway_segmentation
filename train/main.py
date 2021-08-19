@@ -43,7 +43,7 @@ def wandb_config():
 
     config.mask = 'airway'
     config.model = 'UNet'
-    config.encoder = 'timm-efficientnet-b4'
+    config.encoder = 'timm-efficientnet-b5'
     config.activation = 'relu'
     config.optimizer = 'adam'
     config.scheduler = 'CosineAnnealingWarmRestarts'
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     eng = Segmentor(model=model, 
                     optimizer=optimizer,
                     scheduler=scheduler,
-                    loss_fn=loss_fn,
+                    # loss_fn=loss_fn,
                     device=config.device,
                     scaler=scaler)
 
