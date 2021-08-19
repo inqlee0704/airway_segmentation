@@ -4,6 +4,7 @@ from torch.cuda import amp
 from sklearn import metrics
 import numpy as np
 
+from torch import nn
 
 def Dice3d(a,b):
     # print(f'pred shape: {a.shape}')
@@ -14,15 +15,30 @@ def Dice3d(a,b):
         return -1
     return 2.*float(intersection)/float(volume)
 
-def dice_loss(pred, target, smooth = 1.):
+def cal_dice(pred, target, smooth = 1.):
     pred = pred.contiguous()
     target = target.contiguous()    
-
     intersection = (pred * target).sum(dim=2).sum(dim=2)
-    
-    loss = (1 - ((2. * intersection + smooth) / (pred.sum(dim=2).sum(dim=2) + target.sum(dim=2).sum(dim=2) + smooth)))
-    
+    loss = ((2. * intersection + smooth) / (pred.sum(dim=2).sum(dim=2) + target.sum(dim=2).sum(dim=2) + smooth))
     return loss.mean()
+
+def cal_dice_loss(pred, target, smooth = 1.):
+    pred = pred.contiguous()
+    target = target.contiguous()    
+    intersection = (pred * target).sum(dim=2).sum(dim=2)
+    loss = (1 - ((2. * intersection + smooth) / (pred.sum(dim=2).sum(dim=2) + target.sum(dim=2).sum(dim=2) + smooth)))
+    return loss.mean()
+
+def cal_loss(outputs, targets, bce_weight=0.5):
+    BCE_fn = nn.BCEWithLogitsLoss()
+    bce_loss = BCE_fn(outputs, targets)
+
+    preds = torch.sigmoid(outputs)
+    dice_loss = cal_dice_loss(preds, targets)
+    
+    loss = bce_loss * bce_weight + dice_loss * (1-bce_weight)
+
+    return loss, bce_loss, dice_loss
 
 class Segmentor:
     def __init__(self,model,optimizer,scheduler,loss_fn,device,scaler):
@@ -37,8 +53,8 @@ class Segmentor:
     def train(self, data_loader):
         self.model.train()
         epoch_loss = 0
-        epoch_dice = 0
-        skip = 0
+        epoch_dice_loss = 0
+        epoch_bce_loss = 0
         iters = len(data_loader)
         pbar = tqdm(enumerate(data_loader), total=iters)
         for step, batch in pbar:
@@ -50,33 +66,29 @@ class Segmentor:
             # targets = batch['seg'].to(self.device)
             with amp.autocast():
                 outputs = self.model(inputs)
-                # loss = self.loss_fn(outputs, targets[:, 0, :, :])
-                loss = self.loss_fn(outputs, targets)
-            # preds = np.argmax(outputs.cpu().detach().numpy(),axis=1)
+                loss, bce_loss, dice_loss = cal_loss(outputs, targets)
             outputs = torch.sigmoid(outputs)
             preds = np.round(outputs.cpu().detach().numpy())
             preds = np.squeeze(preds, axis=1)
             targets = targets.cpu().detach().numpy()
             targets = np.squeeze(targets,axis=1)
 
-            dice = Dice3d(preds,targets)
             self.scaler.scale(loss).backward()
             self.scaler.step(self.optimizer)
             self.scaler.update()
             self.scheduler.step(self.epoch+step/iters)
             epoch_loss += loss.item()
-            if dice==-1:
-                skip += 1
-            else:
-                epoch_dice += dice
-            pbar.set_description(f'loss:{loss:.3f}, dice:{dice:.3f}') 
-        return epoch_loss/iters, epoch_dice/(iters-skip)
+            epoch_dice_loss += dice_loss.item()
+            epoch_bce_loss += bce_loss.item()
+
+            pbar.set_description(f'loss:{loss:.3f}, dice loss:{dice_loss:.3f}, bce loss:{bce_loss:.3f}') 
+        return epoch_loss/iters, epoch_dice_loss/iters, epoch_bce_loss/iters
 
     def evaluate(self, data_loader):
         self.model.eval()
         epoch_loss = 0
-        epoch_dice = 0
-        skip = 0
+        epoch_dice_loss = 0
+        epoch_bce_loss = 0
         iters = len(data_loader)
         pbar = tqdm(enumerate(data_loader),total=iters)
         with torch.no_grad():
@@ -87,18 +99,20 @@ class Segmentor:
                 # if CrossEntropyLoss,
                 # targets = batch['seg'].to(self.device)
                 outputs = self.model(inputs)
-                loss = self.loss_fn(outputs, targets)
+                # loss = self.loss_fn(outputs, targets)
+                loss, bce_loss, dice_loss = cal_loss(outputs, targets)
                 epoch_loss += loss.item()
+                epoch_dice_loss += dice_loss.item()
+                epoch_bce_loss += bce_loss.item()
+
                 # preds = np.argmax(outputs.cpu().detach().numpy(),axis=1)
-                outputs = torch.sigmoid(outputs)
-                preds = np.round(outputs.cpu().detach().numpy())
-                preds = np.squeeze(preds, axis=1)
-                targets = targets.cpu().detach().numpy()
-                targets = np.squeeze(targets,axis=1)
-                dice = Dice3d(preds,targets)
-                if dice==-1:
-                    skip += 1
-                else:
-                    epoch_dice += dice
-                pbar.set_description(f'loss:{loss:.3f}, dice:{dice:.3f}') 
-            return epoch_loss/iters, epoch_dice/(iters-skip)
+
+                # outputs = torch.sigmoid(outputs)
+                # preds = np.round(outputs.cpu().detach().numpy())
+                # preds = np.squeeze(preds, axis=1)
+                # targets = targets.cpu().detach().numpy()
+                # targets = np.squeeze(targets,axis=1)
+                # dice = Dice3d(preds,targets)
+
+                pbar.set_description(f'loss:{loss:.3f}, dice loss:{dice_loss:.3f}, bce loss:{bce_loss:.3f}') 
+            return epoch_loss/iters, epoch_dice_loss/iters, epoch_bce_loss/iters

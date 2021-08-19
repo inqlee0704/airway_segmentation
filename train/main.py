@@ -15,9 +15,10 @@ import numpy as np
 from torch import nn
 from torch.cuda import amp
 import torch
+from torchsummary import summary
+
 import SimpleITK as sitk
 sitk.ProcessObject_SetGlobalWarningDisplay(False)
-
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
@@ -42,12 +43,13 @@ def wandb_config():
 
     config.mask = 'airway'
     config.model = 'UNet'
-    config.encoder = 'timm-efficientnet-b5'
+    config.encoder = 'timm-efficientnet-b4'
     config.activation = 'relu'
     config.optimizer = 'adam'
     config.scheduler = 'CosineAnnealingWarmRestarts'
-    config.loss = 'BCE'
-    config.pos_weight = 1
+    config.loss = 'BCE+dice'
+    config.bce_weight = 0.5
+    # config.pos_weight = 1
 
     config.learning_rate = 0.0001
     config.train_bs = 8
@@ -88,17 +90,19 @@ if __name__ == "__main__":
         activation_layer = nn.LeakyReLU(inplace=True)
 
     # loss 
-    if config.loss == 'BCE':
-        pos_weight=torch.ones([1])*config.pos_weight
-        loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight.to(config.device))
-    else:
-        loss_fn = nn.CrossEntropyLoss()
+    # if config.loss == 'BCE':
+    #     pos_weight=torch.ones([1])*config.pos_weight
+    #     loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight.to(config.device))
+    # else:
+    #     loss_fn = nn.CrossEntropyLoss()
 
     # model = RecursiveUNet(num_classes=1,activation=activation_layer)
     model = smp.Unet(config.encoder, in_channels=1)
     # model = smp.FPN(config.encoder, in_channels=1)
 
     model.to(config.device)
+    summary(model,(1,512,512))
+
     optimizer = torch.optim.Adam(model.parameters(),lr=config.learning_rate)
     scheduler = CosineAnnealingWarmRestarts(optimizer, 
                                                 T_0=config.epochs, 
@@ -121,29 +125,22 @@ if __name__ == "__main__":
         path = os.path.join(out_dir, "airway_UNet.pth")
 
     best_loss = np.inf
-    best_dice = 0
     # Train
     wandb.watch(eng.model,log='all',log_freq=10)
     for epoch in range(config.epochs):
-        trn_loss, trn_dice = eng.train(train_loader)
-        val_loss, val_dice = eng.evaluate(valid_loader)
-        wandb.log({'epoch': epoch, 'trn_loss': trn_loss, 'val_loss': val_loss,
-                    'trn_dice': trn_dice, 'val_dice': val_dice})
+        trn_loss, trn_dice_loss, trn_bce_loss = eng.train(train_loader)
+        val_loss, val_dice_loss, val_bce_loss = eng.evaluate(valid_loader)
+        wandb.log({'epoch': epoch,
+         'trn_loss': trn_loss, 'trn_dice_loss': trn_dice_loss, 'trn_bce_loss': trn_bce_loss,
+         'val_loss': val_loss, 'val_dice_loss': val_dice_loss, 'val_bce_loss': val_bce_loss})
+
         if config.scheduler == 'ReduceLROnPlateau':
             scheduler.step(val_loss)
         eng.epoch += 1
         print(f'Epoch: {epoch}, train loss: {trn_loss:5f}, valid loss: {val_loss:5f}')
-        print(f'Epoch: {epoch}, train dice: {trn_dice:5f}, valid dice: {val_dice:5f}')
-        #  if val_dice > best_dice:
-        #      best_dice = val_dice
-        #      print('Best Dice:', best_dice)
-        #      if config.save:
-        #          torch.save(model.state_dict(), path)
         if val_loss < best_loss:
             best_loss = val_loss
-            best_dice = val_dice
-            print(f'Best loss: {best_loss} with {best_dice}')
+            print(f'Best loss: {best_loss} at Epoch: {eng.epoch}')
             if config.save:
                 torch.save(model.state_dict(), path)
                 wandb.save(path)
-                
