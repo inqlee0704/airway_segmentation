@@ -44,7 +44,7 @@ def wandb_config():
     config.mask = 'airway'
     config.model = 'UNet'
     # config.encoder = 'timm-efficientnet-b5'
-    config.activation = 'relu'
+    config.activation = 'leakyrelu'
     config.optimizer = 'adam'
     config.scheduler = 'CosineAnnealingWarmRestarts'
     config.loss = 'BCE+dice'

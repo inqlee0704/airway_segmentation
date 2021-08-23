@@ -37,18 +37,22 @@ def Dice3d(a,b):
 start = time.time()
 infer_path = r"/data4/inqlee0704/ENV18PM_ProjSubjList_IN_Inference.in"
 # parameter_path = '/home/inqlee0704/airway2/RESULTS/Recursive_UNet_CE_4downs_20210317/model.pth'
-parameter_path = '/data1/inqlee0704/airway_segmentation/train/RESULTS/UNet_baseline_relu_20210814/airway_UNet.pth'
+# th=0.4: 0.8896, relu
+# parameter_path = '/data1/inqlee0704/airway_segmentation/train/RESULTS/UNet_baseline_relu_20210814/airway_UNet.pth'
+# th=0.4, 0.9192
+parameter_path = '/data1/inqlee0704/airway_segmentation/train/RESULTS/UNet_BCE_dice_ncase0_20210819/airway_UNet.pth'
 infer_list = pd.read_csv(infer_path,sep='\t')
 
 # Model
-model = RecursiveUNet(num_classes=1, activation=nn.ReLU(inplace=True))
+# model = RecursiveUNet(num_classes=1, activation=nn.ReLU(inplace=True))
+model = RecursiveUNet(num_classes=1, activation=nn.LeakyReLU(inplace=True))
 model.load_state_dict(torch.load(parameter_path))
 DEVICE = 'cuda'
 model.to(DEVICE)
 model.eval()
 # th = 0.5
 
-ths = np.arange(0.2,0.8,0.1)
+ths = np.arange(0.2,0.3,0.05)
 
 for th in ths:
     # Each subject
@@ -73,7 +77,7 @@ for th in ths:
         print(dice_)
         dice.append(dice_)
     print('--------------------')
-    print(th)
+    print(f'Threshold: {th}')
     print(f'Mean: {np.mean(dice)}')
     print('--------------------')
 

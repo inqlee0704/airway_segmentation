@@ -21,6 +21,7 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn import model_selection
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
+from skimage import exposure
 """
 ImageDataset for image classification
 Inputs:
@@ -121,6 +122,60 @@ class SegDataset:
                 'seg': torch.tensor(mask.copy())
                 }
 
+class SegDataset_histoEq:
+    def __init__(self,subjlist, slices, mask_name=None,
+                 resize=None, augmentations=None):
+        self.subj_paths = subjlist.loc[:,'ImgDir'].values
+        self.img_paths = [os.path.join(subj_path,'zunu_vida-ct.img') for subj_path in self.subj_paths]
+        self.mask_paths = [os.path.join(subj_path,'ZUNU_vida-airtree.img.gz') for subj_path in self.subj_paths]
+        self.slices = slices
+        self.pat_num = None
+        self.img = None
+        self.hdr = None
+        self.mask = None
+        self.hist_eq = None
+        self.mask_name = mask_name
+        self.resize = resize
+        self.augmentations = augmentations
+
+
+    def __len__(self):
+        return len(self.slices)
+
+    def __getitem__(self,idx):
+        slc = self.slices[idx]
+        if self.pat_num != slc[0]:
+            self.img,self.hdr = load(self.img_paths[slc[0]])
+            self.img = (self.img-np.min(self.img))/(np.max(self.img)-np.min(self.img))
+
+            self.mask,_ = load(self.mask_paths[slc[0]])
+            if self.mask_name=='airway':
+                self.mask = self.mask/255
+            elif self.mask_name=='lung':
+                self.mask[self.mask==20] = 1
+                self.mask[self.mask==30] = 1
+            else:
+                print('Specify mask_name (airway or lung)')
+                return -1
+
+            self.pat_num = slc[0]
+            self.hist_eq = exposure.equalize_hist(self.img)
+
+        hist_eq = self.hist_eq[:,:,slc[1]] 
+        img = self.img[:,:,slc[1]]
+        mask = self.mask[:,:,slc[1]]
+        mask = mask.astype(int)
+        hist_eq = hist_eq[None,:]
+        img = img[None,:]
+        mask = mask[None,:]
+        img = np.concatenate([img,hist_eq],axis=0)
+        if self.augmentations is not None:
+            augmented = self.augmentations(image=img,mask=mask)
+            img,mask = augmented['image'], augmented['mask']
+        return {
+                'image': torch.tensor(img.copy()),
+                'seg': torch.tensor(mask.copy())
+                }
 
 class SegDataset2:
     def __init__(self,subjlist, slices, mask_name=None,
@@ -334,11 +389,11 @@ def prep_dataloader(c,n_case=0,LOAD_ALL=False):
     else:
         train_slices = slice_loader(df_train)
         valid_slices = slice_loader(df_valid)
-        train_ds = SegDataset2(df_train,
+        train_ds = SegDataset_histoEq(df_train,
                               train_slices,
                               mask_name=c.mask,
                               augmentations=get_train_aug())
-        valid_ds = SegDataset2(df_valid, valid_slices, mask_name=c.mask)
+        valid_ds = SegDataset_histoEq(df_valid, valid_slices, mask_name=c.mask)
         train_loader = DataLoader(train_ds,
                                   batch_size=c.train_bs,
                                   shuffle=False,
