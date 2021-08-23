@@ -2,9 +2,6 @@ import torch
 import torch.nn as nn
 import torchvision
 
-# Copyright 2017 Division of Medical Image Computing, German Cancer Research Center (DKFZ)
-# Defines the Unet.
-# |num_downs|: number of downsamplings in UNet. For example,
 # if |num_downs| == 7, image of size 128x128 will become of size 1x1 at the bottleneck
 # Copyright 2017 Division of Medical Image Computing, German Cancer Research Center (DKFZ)
 # Defines the Unet.

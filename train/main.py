@@ -43,7 +43,7 @@ def wandb_config():
 
     config.mask = 'airway'
     config.model = 'UNet'
-    config.encoder = 'timm-efficientnet-b5'
+    # config.encoder = 'timm-efficientnet-b5'
     config.activation = 'relu'
     config.optimizer = 'adam'
     config.scheduler = 'CosineAnnealingWarmRestarts'
@@ -52,8 +52,8 @@ def wandb_config():
     # config.pos_weight = 1
 
     config.learning_rate = 0.0001
-    config.train_bs = 8
-    config.valid_bs = 16
+    config.train_bs = 4
+    config.valid_bs = 8
     config.aug = True
 
     config.save = False
@@ -69,7 +69,6 @@ def wandb_config():
 if __name__ == "__main__": 
     load_dotenv()
     seed_everything()
-    # wandb.init(project='airway')
     config = wandb_config()
     wandb.init(project=config.project)
     
@@ -96,12 +95,12 @@ if __name__ == "__main__":
     # else:
     #     loss_fn = nn.CrossEntropyLoss()
 
-    # model = RecursiveUNet(num_classes=1,activation=activation_layer)
-    model = smp.Unet(config.encoder, in_channels=1)
+    model = RecursiveUNet(num_classes=1,in_channels=2, activation=activation_layer)
+    # model = smp.Unet(config.encoder, in_channels=1)
     # model = smp.FPN(config.encoder, in_channels=1)
 
     model.to(config.device)
-    summary(model,(1,512,512))
+    summary(model,(2,512,512))
 
     optimizer = torch.optim.Adam(model.parameters(),lr=config.learning_rate)
     scheduler = CosineAnnealingWarmRestarts(optimizer, 

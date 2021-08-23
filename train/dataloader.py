@@ -120,6 +120,61 @@ class SegDataset:
                 'image': torch.tensor(img.copy()),
                 'seg': torch.tensor(mask.copy())
                 }
+
+
+class SegDataset2:
+    def __init__(self,subjlist, slices, mask_name=None,
+                 resize=None, augmentations=None):
+        self.subj_paths = subjlist.loc[:,'ImgDir'].values
+        self.img_paths = [os.path.join(subj_path,'zunu_vida-ct.img') for subj_path in self.subj_paths]
+        self.mask_paths = [os.path.join(subj_path,'ZUNU_vida-airtree.img.gz') for subj_path in self.subj_paths]
+        self.slices = slices
+        self.pat_num = None
+        self.img = None
+        self.hdr = None
+        self.mask = None
+        self.mask_name = mask_name
+        self.resize = resize
+        self.augmentations = augmentations
+
+
+    def __len__(self):
+        return len(self.slices)
+
+    def __getitem__(self,idx):
+        slc = self.slices[idx]
+        if self.pat_num != slc[0]:
+            self.img,self.hdr = load(self.img_paths[slc[0]])
+            self.mask,_ = load(self.mask_paths[slc[0]])
+            self.pat_num = slc[0]
+        z = slc[1]/self.img.shape[2]
+        img = self.img[:,:,slc[1]]
+        mask = self.mask[:,:,slc[1]]
+        img = (img-np.min(img))/(np.max(img)-np.min(img))
+        # img = (img-(-1250))/((250)-(-1250))
+        # Airway mask is stored as 255
+        if self.mask_name=='airway':
+            mask = mask/255
+        elif self.mask_name=='lung':
+            mask[mask==20] = 1
+            mask[mask==30] = 1
+        else:
+            print('Specify mask_name (airway or lung)')
+            return -1
+        mask = mask.astype(int)
+        z_map = np.ones((1, img.shape[0], img.shape[1])) * z
+        img = img[None,:]
+        mask = mask[None,:]
+
+        if self.augmentations is not None:
+            augmented = self.augmentations(image=img,mask=mask)
+            img,mask = augmented['image'], augmented['mask']
+        # Concat z_map            
+        img = np.concatenate([img,z_map],axis=0)
+        return {
+                'image': torch.tensor(img.copy()),
+                'seg': torch.tensor(mask.copy())
+                }
 """
 ImageDataset for 3D semantic segmentation
 Similar to SegDataset,
@@ -279,11 +334,11 @@ def prep_dataloader(c,n_case=0,LOAD_ALL=False):
     else:
         train_slices = slice_loader(df_train)
         valid_slices = slice_loader(df_valid)
-        train_ds = SegDataset(df_train,
+        train_ds = SegDataset2(df_train,
                               train_slices,
                               mask_name=c.mask,
                               augmentations=get_train_aug())
-        valid_ds = SegDataset(df_valid, valid_slices, mask_name=c.mask)
+        valid_ds = SegDataset2(df_valid, valid_slices, mask_name=c.mask)
         train_loader = DataLoader(train_ds,
                                   batch_size=c.train_bs,
                                   shuffle=False,
