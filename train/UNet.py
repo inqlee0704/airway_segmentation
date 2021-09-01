@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torchvision
 
 # if |num_downs| == 7, image of size 128x128 will become of size 1x1 at the bottleneck
 # Copyright 2017 Division of Medical Image Computing, German Cancer Research Center (DKFZ)

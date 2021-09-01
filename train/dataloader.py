@@ -389,11 +389,11 @@ def prep_dataloader(c,n_case=0,LOAD_ALL=False):
     else:
         train_slices = slice_loader(df_train)
         valid_slices = slice_loader(df_valid)
-        train_ds = SegDataset_histoEq(df_train,
+        train_ds = SegDataset(df_train,
                               train_slices,
                               mask_name=c.mask,
                               augmentations=get_train_aug())
-        valid_ds = SegDataset_histoEq(df_valid, valid_slices, mask_name=c.mask)
+        valid_ds = SegDataset(df_valid, valid_slices, mask_name=c.mask)
         train_loader = DataLoader(train_ds,
                                   batch_size=c.train_bs,
                                   shuffle=False,

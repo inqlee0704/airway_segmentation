@@ -4,8 +4,9 @@ import time
 import random
 import wandb
 
-from UNet import RecursiveUNet
-import segmentation_models_pytorch as smp
+# from UNet import RecursiveUNet
+from UNet2 import UNet
+# import segmentation_models_pytorch as smp
 
 from engine import Segmentor
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts,CosineAnnealingLR, ReduceLROnPlateau
@@ -52,8 +53,8 @@ def wandb_config():
     # config.pos_weight = 1
 
     config.learning_rate = 0.0001
-    config.train_bs = 4
-    config.valid_bs = 8
+    config.train_bs = 8
+    config.valid_bs = 16
     config.aug = True
 
     config.save = False
@@ -95,12 +96,13 @@ if __name__ == "__main__":
     # else:
     #     loss_fn = nn.CrossEntropyLoss()
 
-    model = RecursiveUNet(num_classes=1,in_channels=2, activation=activation_layer)
+    # model = RecursiveUNet(num_classes=1,in_channels=1, activation=activation_layer)
+    model = UNet()
     # model = smp.Unet(config.encoder, in_channels=1)
     # model = smp.FPN(config.encoder, in_channels=1)
 
     model.to(config.device)
-    summary(model,(2,512,512))
+    summary(model,(1,512,512))
 
     optimizer = torch.optim.Adam(model.parameters(),lr=config.learning_rate)
     scheduler = CosineAnnealingWarmRestarts(optimizer, 
