@@ -164,7 +164,10 @@ class SegDataset_withZ:
             self.img,self.hdr = load(self.img_paths[slc[0]])
             self.mask,_ = load(self.mask_paths[slc[0]])
             self.pat_num = slc[0]
-        z = slc[1]/self.img.shape[2]
+        
+        z = slc[1]/(self.img.shape[2]+1)
+        # z ranges from 0 to 9
+        z = np.floor(z*10)
         img = self.img[:,:,slc[1]]
         mask = self.mask[:,:,slc[1]]
         img = (img-np.min(img))/(np.max(img)-np.min(img))
@@ -177,18 +180,17 @@ class SegDataset_withZ:
             print('Specify mask_name (airway or lung)')
             return -1
         mask = mask.astype(int)
-        z_map = np.ones((1, img.shape[0], img.shape[1])) * z
         img = img[None,:]
         mask = mask[None,:]
 
         if self.augmentations is not None:
             augmented = self.augmentations(image=img,mask=mask)
             img,mask = augmented['image'], augmented['mask']
-        # Concat z_map            
-        img = np.concatenate([img,z_map],axis=0)
+
         return {
                 'image': torch.tensor(img.copy()),
-                'seg': torch.tensor(mask.copy())
+                'seg': torch.tensor(mask.copy()),
+                'z': torch.tensor(z, dtype=torch.int64)
                 }
 """
 ImageDataset for 3D semantic segmentation
@@ -349,11 +351,11 @@ def prep_dataloader(c,n_case=0,LOAD_ALL=False):
     else:
         train_slices = slice_loader(df_train)
         valid_slices = slice_loader(df_valid)
-        train_ds = SegDataset(df_train,
+        train_ds = SegDataset_withZ(df_train,
                               train_slices,
                               mask_name=c.mask,
                               augmentations=get_train_aug())
-        valid_ds = SegDataset(df_valid, valid_slices, mask_name=c.mask)
+        valid_ds = SegDataset_withZ(df_valid, valid_slices, mask_name=c.mask)
         train_loader = DataLoader(train_ds,
                                   batch_size=c.train_bs,
                                   shuffle=False,

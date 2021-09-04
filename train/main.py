@@ -4,9 +4,7 @@ import time
 import random
 import wandb
 
-# from UNet import RecursiveUNet
-from UNet2 import UNet
-# import segmentation_models_pytorch as smp
+from UNet2 import ZUNet_v1
 
 from engine import Segmentor
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts,CosineAnnealingLR, ReduceLROnPlateau
@@ -44,13 +42,11 @@ def wandb_config():
 
     config.mask = 'airway'
     config.model = 'UNet'
-    # config.encoder = 'timm-efficientnet-b5'
     config.activation = 'leakyrelu'
     config.optimizer = 'adam'
     config.scheduler = 'CosineAnnealingWarmRestarts'
     config.loss = 'BCE+dice'
     config.bce_weight = 0.5
-    # config.pos_weight = 1
 
     config.learning_rate = 0.0001
     config.train_bs = 8
@@ -71,7 +67,7 @@ if __name__ == "__main__":
     load_dotenv()
     seed_everything()
     config = wandb_config()
-    wandb.init(project=config.project)
+    # wandb.init(project=config.project)
     
     # Data
     n_case = 64
@@ -97,12 +93,9 @@ if __name__ == "__main__":
     #     loss_fn = nn.CrossEntropyLoss()
 
     # model = RecursiveUNet(num_classes=1,in_channels=1, activation=activation_layer)
-    model = UNet()
-    # model = smp.Unet(config.encoder, in_channels=1)
-    # model = smp.FPN(config.encoder, in_channels=1)
-
+    model = ZUNet_v1()
     model.to(config.device)
-    summary(model,(1,512,512))
+    # summary(model,(1,512,512),3)
 
     optimizer = torch.optim.Adam(model.parameters(),lr=config.learning_rate)
     scheduler = CosineAnnealingWarmRestarts(optimizer, 
@@ -127,13 +120,13 @@ if __name__ == "__main__":
 
     best_loss = np.inf
     # Train
-    wandb.watch(eng.model,log='all',log_freq=10)
+    # wandb.watch(eng.model,log='all',log_freq=10)
     for epoch in range(config.epochs):
         trn_loss, trn_dice_loss, trn_bce_loss = eng.train(train_loader)
         val_loss, val_dice_loss, val_bce_loss = eng.evaluate(valid_loader)
-        wandb.log({'epoch': epoch,
-         'trn_loss': trn_loss, 'trn_dice_loss': trn_dice_loss, 'trn_bce_loss': trn_bce_loss,
-         'val_loss': val_loss, 'val_dice_loss': val_dice_loss, 'val_bce_loss': val_bce_loss})
+        # wandb.log({'epoch': epoch,
+        #  'trn_loss': trn_loss, 'trn_dice_loss': trn_dice_loss, 'trn_bce_loss': trn_bce_loss,
+        #  'val_loss': val_loss, 'val_dice_loss': val_dice_loss, 'val_bce_loss': val_bce_loss})
 
         if config.scheduler == 'ReduceLROnPlateau':
             scheduler.step(val_loss)

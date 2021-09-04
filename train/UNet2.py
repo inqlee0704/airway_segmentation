@@ -20,9 +20,9 @@ def crop_img(tensor, target_tensor):
     delta = delta // 2
     return tensor[:,:, delta:tensor_size-delta, delta:tensor_size-delta]
 
-class UNet(nn.Module):
+class ZUNet_v1(nn.Module):
     def __init__(self):
-        super(UNet, self).__init__()
+        super(ZUNet_v1, self).__init__()
         self.max_pool_2x2 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.down_conv_1 = double_conv(1, 64)
         self.down_conv_2 = double_conv(64, 128)
@@ -31,7 +31,8 @@ class UNet(nn.Module):
         self.down_conv_5 = double_conv(512, 1024)
 
         self.up_trans_1 = nn.ConvTranspose2d(
-            in_channels=1024,
+            # in_channels=1024,
+            in_channels=1034,
             out_channels=512,
             kernel_size=2,
             stride=2)
@@ -59,7 +60,7 @@ class UNet(nn.Module):
             out_channels=1,
             kernel_size=1)
 
-    def forward(self,image):
+    def forward(self,image, z):
         # encoder
         x1 = self.down_conv_1(image) # ---->
         x2 = self.max_pool_2x2(x1)
@@ -71,8 +72,12 @@ class UNet(nn.Module):
         x8 = self.max_pool_2x2(x7)
         x9 = self.down_conv_5(x8)
 
+        # add z
+        one_hot_z = nn.functional.one_hot(z,num_classes=10)
+        one_hot_z = torch.unsqueeze(torch.unsqueeze(one_hot_z,-1),-1)
+        x9_z = torch.cat([x9,one_hot_z.repeat(1,1,32,32)],dim=1)
         # decoder
-        x = self.up_trans_1(x9)
+        x = self.up_trans_1(x9_z)
         y = crop_img(x7,x)
         x = self.up_conv_1(torch.cat([x, y],1))
         x = self.up_trans_2(x)
