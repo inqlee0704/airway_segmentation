@@ -22,44 +22,7 @@ from sklearn import model_selection
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from skimage import exposure
-"""
-ImageDataset for image classification
-Inputs:
-    - img_paths: image paths [list]
-    - targets:´ labels [list]
-Outputs:
-    - dictionary that containts both image tensor & target tensor [dict]
-"""
-class ImageDataset:
-    def __init__(self,img_paths, targets, resize=None, augmentations=None):
-        self.img_paths = img_paths
-        self.targets = targets
-        self.resize = resize
-        self.augmentations = augmentations
 
-    def __len__(self):
-        return len(self.img_paths)
-
-    def __getitem__(self,item):
-        targets = self.targets[item]
-        # when cv2.imread is called, the order of colors is BGR
-        # need to convert back to RGB
-        img = cv2.imread(self.img_paths[item])
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        if self.resize is not None:
-            img = cv2.resize(img,
-                            (self.resize[1], self.resize[0]),
-                             interpolation=cv2.INTER_CUBIC)
-        if self.augmentations is not None:
-            augmented = self.augmentations(img=img)
-            img = augmented['img']
-        # reshape such that channel goes to the first dimension
-        # ex) [256,256,3] -> [3,256,256]
-        img = np.transpose(img,(2,0,1)).astype(np.float32)
-        return {
-            'img': torch.tensor(img),
-            'targets': torch.tensor(targets)
-        }
 
 """
 ImageDataset for 3D CT image Segmentation
@@ -177,7 +140,7 @@ class SegDataset_histoEq:
                 'seg': torch.tensor(mask.copy())
                 }
 
-class SegDataset2:
+class SegDataset_withZ:
     def __init__(self,subjlist, slices, mask_name=None,
                  resize=None, augmentations=None):
         self.subj_paths = subjlist.loc[:,'ImgDir'].values
@@ -192,7 +155,6 @@ class SegDataset2:
         self.resize = resize
         self.augmentations = augmentations
 
-
     def __len__(self):
         return len(self.slices)
 
@@ -206,8 +168,6 @@ class SegDataset2:
         img = self.img[:,:,slc[1]]
         mask = self.mask[:,:,slc[1]]
         img = (img-np.min(img))/(np.max(img)-np.min(img))
-        # img = (img-(-1250))/((250)-(-1250))
-        # Airway mask is stored as 255
         if self.mask_name=='airway':
             mask = mask/255
         elif self.mask_name=='lung':
