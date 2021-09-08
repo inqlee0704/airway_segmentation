@@ -54,6 +54,8 @@ class SegDataset:
         slc = self.slices[idx]
         if self.pat_num != slc[0]:
             self.img,_ = load(self.img_paths[slc[0]])
+            # some background values are set to -3024
+            self.img[self.img<-1024] = -1024
             self.mask,_ = load(self.mask_paths[slc[0]])
             self.pat_num = slc[0]
         img = self.img[:,:,slc[1]]
@@ -109,6 +111,8 @@ class SegDataset_histoEq:
         slc = self.slices[idx]
         if self.pat_num != slc[0]:
             self.img,self.hdr = load(self.img_paths[slc[0]])
+            # some background values are set to -3024
+            self.img[self.img<-1024] = -1024
             self.img = (self.img-np.min(self.img))/(np.max(self.img)-np.min(self.img))
 
             self.mask,_ = load(self.mask_paths[slc[0]])
@@ -162,6 +166,8 @@ class SegDataset_withZ:
         slc = self.slices[idx]
         if self.pat_num != slc[0]:
             self.img,self.hdr = load(self.img_paths[slc[0]])
+            # some background values are set to -3024
+            self.img[self.img<-1024] = -1024
             self.mask,_ = load(self.mask_paths[slc[0]])
             self.pat_num = slc[0]
         
@@ -192,32 +198,6 @@ class SegDataset_withZ:
                 'seg': torch.tensor(mask.copy()),
                 'z': torch.tensor(z, dtype=torch.int64)
                 }
-"""
-ImageDataset for 3D semantic segmentation
-Similar to SegDataset,
-except SlicesDataset load all images into memory
-"""
-class SlicesDataset(Dataset):
-    def __init__(self,data):
-        self.data = data
-        self.slices = []
-        for i,d in enumerate(data):
-            for j in range(d['image'].shape[2]):
-                self.slices.append((i,j))
-
-    def __getitem__(self,idx):
-        slc = self.slices[idx]
-        sample = dict()
-        sample['id'] = idx
-        img = self.data[slc[0]]['image'][:,:,slc[1]]
-        seg = self.data[slc[0]]['seg'][:,:,slc[1]]
-        img = img[None,:]
-        seg = seg[None,:]
-        sample['image'] = torch.from_numpy(img)
-        sample['seg'] = torch.from_numpy(seg)
-        return sample
-    def __len__(self):
-        return len(self.slices)
 
 """
 Slice loader which outputs slice information for each CT
@@ -270,6 +250,8 @@ def CT_loader(subjlist, mask_name=None):
     out =[]
     for ii in range(len(dicom_paths)):
         image, _ = load(dicom_paths[ii])
+        # some background values are set to -3024
+        image[image<-1024] = -1024
         label,_ = load(airmask_paths[ii])
         image = (image-np.min(image))/(np.max(image)-np.min(image))
         # image = (image-(-1250))/((250)-(-1250))
@@ -305,7 +287,7 @@ Check files before the train
 
 """
 def check_files(subjlist):
-    subj_path = subjlist.loc[:,'ImgDir'].values
+    subj_paths = subjlist.loc[:,'ImgDir'].values
     img_path_ = [os.path.join(subj_path,'zunu_vida-ct.img') for subj_path in
             subj_paths]
     mask_path_ = [os.path.join(subj_path,'ZUNU_vida-airtree.img.gz') for
@@ -320,7 +302,7 @@ def check_files(subjlist):
 """
 Prepare train & valid dataloaders
 """
-def prep_dataloader(c,n_case=0,LOAD_ALL=False):
+def prep_dataloader(c,n_case=0):
 # n_case: load n number of cases, 0: load all
     df_subjlist = pd.read_csv(os.path.join(c.data_path,c.in_file),sep='\t')
     if n_case==0:
@@ -337,33 +319,22 @@ def prep_dataloader(c,n_case=0,LOAD_ALL=False):
              stratify=None)
     df_train = df_train.reset_index(drop=True)
     df_valid = df_valid.reset_index(drop=True)
-    if LOAD_ALL:
-        train_loader = DataLoader(SlicesDataset(CT_loader(df_train,
-            mask_name=c.mask)),
-            batch_size=c.train_bs, 
-            shuffle=True,
-            num_workers=0)
-        valid_loader = DataLoader(SlicesDataset(CT_loader(df_valid,
-            mask_name=c.mask)),
-            batch_size=c.valid_bs, 
-            shuffle=True,
-            num_workers=0)
-    else:
-        train_slices = slice_loader(df_train)
-        valid_slices = slice_loader(df_valid)
-        train_ds = SegDataset_withZ(df_train,
-                              train_slices,
-                              mask_name=c.mask,
-                              augmentations=get_train_aug())
-        valid_ds = SegDataset_withZ(df_valid, valid_slices, mask_name=c.mask)
-        train_loader = DataLoader(train_ds,
-                                  batch_size=c.train_bs,
-                                  shuffle=False,
-                                  num_workers=0)
-        valid_loader = DataLoader(valid_ds,
-                                  batch_size=c.valid_bs,
-                                  shuffle=False,
-                                  num_workers=0)
+
+    train_slices = slice_loader(df_train)
+    valid_slices = slice_loader(df_valid)
+    train_ds = SegDataset_withZ(df_train,
+                            train_slices,
+                            mask_name=c.mask,
+                            augmentations=get_train_aug())
+    valid_ds = SegDataset_withZ(df_valid, valid_slices, mask_name=c.mask)
+    train_loader = DataLoader(train_ds,
+                                batch_size=c.train_bs,
+                                shuffle=False,
+                                num_workers=0)
+    valid_loader = DataLoader(valid_ds,
+                                batch_size=c.valid_bs,
+                                shuffle=False,
+                                num_workers=0)
 
     return train_loader, valid_loader
 
