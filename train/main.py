@@ -33,7 +33,7 @@ def seed_everything(seed=42):
 
 def wandb_config():
     project = 'airway'
-    run_name = 'UNet'
+    run_name = 'UNet_64'
     debug = True
     if debug:
         project = 'debug'
@@ -46,7 +46,7 @@ def wandb_config():
     else:
         config.epochs = 30
     # n_case = 0 to run all cases
-    config.n_case = 8
+    config.n_case = 64
 
     config.save = False
     config.data_path = os.getenv('VIDA_PATH')
@@ -64,8 +64,8 @@ def wandb_config():
     config.bce_weight = 0.5
 
     config.learning_rate = 0.0002
-    config.train_bs = 2
-    config.valid_bs = 4
+    config.train_bs = 16
+    config.valid_bs = 32
     config.aug = True
 
     return config
