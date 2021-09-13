@@ -32,12 +32,27 @@ def seed_everything(seed=42):
     torch.backends.cudnn.benchmark = True
 
 def wandb_config():
+    project = 'airway'
+    run_name = 'ZUNet_v1'
+    debug = True 
+    if debug:
+        project = 'debug'
+
+    wandb.init(project=project,name=run_name)
     config = wandb.config
     # ENV
+    if debug:
+        config.epochs = 1
+    else:
+        config.epochs = 30
+    # n_case = 0 to run all cases
+    config.n_case = 16
+
+    config.save = False
     config.data_path = os.getenv('VIDA_PATH')
     config.in_file = 'ENV18PM_ProjSubjList_cleaned_IN.in'
     config.test_results_dir = "RESULTS"
-    config.name = 'UNet_resnet'
+    config.name = run_name
     config.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     config.mask = 'airway'
@@ -53,28 +68,14 @@ def wandb_config():
     config.valid_bs = 16
     config.aug = True
 
-    config.save = False
-    config.debug = True 
-    if config.debug:
-        config.epochs = 1
-        config.project = 'debug'
-    else:
-        config.epochs = 30
-        config.project = 'airway'
     return config
 
 if __name__ == "__main__": 
     load_dotenv()
     seed_everything()
     config = wandb_config()
-    # wandb.init(project=config.project)
-    
     # Data
-    n_case = 64
-    if config.debug: # only use 10 cases, 1 epoch
-        train_loader, valid_loader = prep_dataloader(config,n_case=5)
-    else:
-        train_loader, valid_loader = prep_dataloader(config,n_case=n_case)
+    train_loader, valid_loader = prep_dataloader(config)
 
     # Model #
     # Activation

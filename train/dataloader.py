@@ -302,9 +302,10 @@ def check_files(subjlist):
 """
 Prepare train & valid dataloaders
 """
-def prep_dataloader(c,n_case=0):
+def prep_dataloader(c):
 # n_case: load n number of cases, 0: load all
     df_subjlist = pd.read_csv(os.path.join(c.data_path,c.in_file),sep='\t')
+    n_case = c.n_case
     if n_case==0:
         df_train, df_valid = model_selection.train_test_split(
                 df_subjlist,

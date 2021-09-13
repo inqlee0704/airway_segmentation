@@ -60,7 +60,6 @@ class Segmentor:
         for step, batch in pbar:
             self.optimizer.zero_grad()
             z = batch ['z'].to(self.device)
-            print(z)
             inputs = batch['image'].to(self.device,dtype=torch.float)
             # if BCEwithLogitsLoss,
             targets = batch['seg'].to(self.device, dtype=torch.float)
