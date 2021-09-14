@@ -34,7 +34,7 @@ def seed_everything(seed=42):
 def wandb_config():
     project = 'airway'
     run_name = 'UNet_64'
-    debug = True
+    debug = False
     if debug:
         project = 'debug'
 
