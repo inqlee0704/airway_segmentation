@@ -29,7 +29,7 @@ def seed_everything(seed=42):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.benchmark = False
 
 def wandb_config():
     project = 'airway'
@@ -46,7 +46,7 @@ def wandb_config():
     else:
         config.epochs = 30
     # n_case = 0 to run all cases
-    config.n_case = 16
+    config.n_case = 64
 
     config.save = False
     config.data_path = os.getenv('VIDA_PATH')
@@ -63,9 +63,9 @@ def wandb_config():
     config.loss = 'BCE+dice'
     config.bce_weight = 0.5
 
-    config.learning_rate = 0.0001
-    config.train_bs = 8
-    config.valid_bs = 16
+    config.learning_rate = 0.0002
+    config.train_bs = 16
+    config.valid_bs = 32
     config.aug = True
 
     return config
@@ -121,13 +121,13 @@ if __name__ == "__main__":
 
     best_loss = np.inf
     # Train
-    # wandb.watch(eng.model,log='all',log_freq=10)
+    wandb.watch(eng.model,log='all',log_freq=10)
     for epoch in range(config.epochs):
         trn_loss, trn_dice_loss, trn_bce_loss = eng.train(train_loader)
         val_loss, val_dice_loss, val_bce_loss = eng.evaluate(valid_loader)
-        # wandb.log({'epoch': epoch,
-        #  'trn_loss': trn_loss, 'trn_dice_loss': trn_dice_loss, 'trn_bce_loss': trn_bce_loss,
-        #  'val_loss': val_loss, 'val_dice_loss': val_dice_loss, 'val_bce_loss': val_bce_loss})
+        wandb.log({'epoch': epoch,
+         'trn_loss': trn_loss, 'trn_dice_loss': trn_dice_loss, 'trn_bce_loss': trn_bce_loss,
+         'val_loss': val_loss, 'val_dice_loss': val_dice_loss, 'val_bce_loss': val_bce_loss})
 
         if config.scheduler == 'ReduceLROnPlateau':
             scheduler.step(val_loss)
