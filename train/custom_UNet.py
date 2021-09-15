@@ -21,10 +21,11 @@ def crop_img(tensor, target_tensor):
     return tensor[:,:, delta:tensor_size-delta, delta:tensor_size-delta]
 
 class UNet(nn.Module):
-    def __init__(self):
+    def __init__(self,
+                in_channels=1):
         super(UNet, self).__init__()
         self.max_pool_2x2 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.down_conv_1 = double_conv(1, 64)
+        self.down_conv_1 = double_conv(in_channels, 64)
         self.down_conv_2 = double_conv(64, 128)
         self.down_conv_3 = double_conv(128, 256)
         self.down_conv_4 = double_conv(256, 512)

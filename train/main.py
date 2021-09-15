@@ -5,7 +5,8 @@ import random
 import wandb
 
 # from UNet2 import ZUNet_v1
-from preactivation_UNet import UNet
+# from preactivation_UNet import UNet
+from custom_UNet import UNet
 
 from engine import Segmentor
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts,CosineAnnealingLR, ReduceLROnPlateau
@@ -34,8 +35,8 @@ def seed_everything(seed=42):
 
 def wandb_config():
     project = 'airway'
-    run_name = 'Preactivation_UNet64'
-    debug = False
+    run_name = 'MultiC_UNet64'
+    debug = True
     if debug:
         project = 'debug'
 
@@ -47,7 +48,7 @@ def wandb_config():
     else:
         config.epochs = 30
     # n_case = 0 to run all cases
-    config.n_case = 64
+    config.n_case = 16
 
     config.save = False
     config.data_path = os.getenv('VIDA_PATH')
@@ -65,8 +66,8 @@ def wandb_config():
     config.bce_weight = 0.5
 
     config.learning_rate = 0.0002
-    config.train_bs = 16
-    config.valid_bs = 32
+    config.train_bs = 8
+    config.valid_bs = 16
     config.aug = True
 
     return config
@@ -96,7 +97,7 @@ if __name__ == "__main__":
 
     # model = RecursiveUNet(num_classes=1,in_channels=1, activation=activation_layer)
     # model = ZUNet_v1()
-    model = UNet()
+    model = UNet(in_channels=3)
     model.to(config.device)
     # summary(model,(1,512,512),3)
 
