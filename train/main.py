@@ -4,7 +4,7 @@ import time
 import random
 import wandb
 
-from custom_UNet import UNet
+from preactivation_UNet import UNet
 
 from engine import Segmentor
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts,CosineAnnealingLR, ReduceLROnPlateau
@@ -33,7 +33,7 @@ def seed_everything(seed=42):
 
 def wandb_config():
     project = 'airway'
-    run_name = 'UNet'
+    run_name = 'Preactivation_UNet'
     debug = True
     if debug:
         project = 'debug'
@@ -46,7 +46,7 @@ def wandb_config():
     else:
         config.epochs = 30
     # n_case = 0 to run all cases
-    config.n_case = 8
+    config.n_case = 64
 
     config.save = False
     config.data_path = os.getenv('VIDA_PATH')
@@ -56,7 +56,7 @@ def wandb_config():
     config.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     config.mask = 'airway'
-    config.model = 'UNet'
+    config.model = 'Preactivation_UNet'
     config.activation = 'leakyrelu'
     config.optimizer = 'adam'
     config.scheduler = 'CosineAnnealingWarmRestarts'
@@ -64,8 +64,8 @@ def wandb_config():
     config.bce_weight = 0.5
 
     config.learning_rate = 0.0002
-    config.train_bs = 2
-    config.valid_bs = 4
+    config.train_bs = 8
+    config.valid_bs = 16
     config.aug = True
 
     return config
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # model = ZUNet_v1()
     model = UNet()
     model.to(config.device)
-    # summary(model,(1,512,512),3)
+    summary(model,(1,512,512))
 
     optimizer = torch.optim.Adam(model.parameters(),lr=config.learning_rate)
     scheduler = CosineAnnealingWarmRestarts(optimizer, 
