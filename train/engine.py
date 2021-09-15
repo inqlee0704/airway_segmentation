@@ -59,13 +59,14 @@ class Segmentor:
         pbar = tqdm(enumerate(data_loader), total=iters)
         for step, batch in pbar:
             self.optimizer.zero_grad()
+            z = batch['z'].to(self.device)
             inputs = batch['image'].to(self.device,dtype=torch.float)
             # if BCEwithLogitsLoss,
             targets = batch['seg'].to(self.device, dtype=torch.float)
             # if CrossEntropyLoss,
             # targets = batch['seg'].to(self.device)
             with amp.autocast():
-                outputs = self.model(inputs)
+                outputs = self.model(inputs,z)
                 loss, bce_loss, dice_loss = cal_loss(outputs, targets)
             outputs = torch.sigmoid(outputs)
             preds = np.round(outputs.cpu().detach().numpy())
@@ -93,26 +94,19 @@ class Segmentor:
         pbar = tqdm(enumerate(data_loader),total=iters)
         with torch.no_grad():
             for step, batch in pbar:
+                z = batch['z'].to(self.device)
                 inputs = batch['image'].to(self.device,dtype=torch.float)
                 # if BCEwithLogitsLoss,
                 targets = batch['seg'].to(self.device, dtype=torch.float)
                 # if CrossEntropyLoss,
                 # targets = batch['seg'].to(self.device)
-                outputs = self.model(inputs)
+                outputs = self.model(inputs,z)
                 # loss = self.loss_fn(outputs, targets)
                 loss, bce_loss, dice_loss = cal_loss(outputs, targets)
                 epoch_loss += loss.item()
                 epoch_dice_loss += dice_loss.item()
                 epoch_bce_loss += bce_loss.item()
 
-                # preds = np.argmax(outputs.cpu().detach().numpy(),axis=1)
-
-                # outputs = torch.sigmoid(outputs)
-                # preds = np.round(outputs.cpu().detach().numpy())
-                # preds = np.squeeze(preds, axis=1)
-                # targets = targets.cpu().detach().numpy()
-                # targets = np.squeeze(targets,axis=1)
-                # dice = Dice3d(preds,targets)
 
                 pbar.set_description(f'loss:{loss:.3f}, dice loss:{dice_loss:.3f}, bce loss:{bce_loss:.3f}') 
             return epoch_loss/iters, epoch_dice_loss/iters, epoch_bce_loss/iters
