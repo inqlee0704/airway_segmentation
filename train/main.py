@@ -4,7 +4,8 @@ import time
 import random
 import wandb
 
-from UNet2 import ZUNet_v1
+# from UNet2 import ZUNet_v1
+from preactivation_UNet import UNet
 
 from engine import Segmentor
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts,CosineAnnealingLR, ReduceLROnPlateau
@@ -33,7 +34,7 @@ def seed_everything(seed=42):
 
 def wandb_config():
     project = 'airway'
-    run_name = 'ZUNet_v1'
+    run_name = 'Preactivation_UNet64'
     debug = False
     if debug:
         project = 'debug'
@@ -94,7 +95,8 @@ if __name__ == "__main__":
     #     loss_fn = nn.CrossEntropyLoss()
 
     # model = RecursiveUNet(num_classes=1,in_channels=1, activation=activation_layer)
-    model = ZUNet_v1()
+    # model = ZUNet_v1()
+    model = UNet()
     model.to(config.device)
     # summary(model,(1,512,512),3)
 
