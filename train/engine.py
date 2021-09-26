@@ -68,11 +68,11 @@ class Segmentor:
             with amp.autocast():
                 outputs = self.model(inputs,z)
                 loss, bce_loss, dice_loss = cal_loss(outputs, targets)
-            outputs = torch.sigmoid(outputs)
-            preds = np.round(outputs.cpu().detach().numpy())
-            preds = np.squeeze(preds, axis=1)
-            targets = targets.cpu().detach().numpy()
-            targets = np.squeeze(targets,axis=1)
+            # outputs = torch.sigmoid(outputs)
+            # preds = np.round(outputs.cpu().detach().numpy())
+            # preds = np.squeeze(preds, axis=1)
+            # targets = targets.cpu().detach().numpy()
+            # targets = np.squeeze(targets,axis=1)
 
             self.scaler.scale(loss).backward()
             self.scaler.step(self.optimizer)

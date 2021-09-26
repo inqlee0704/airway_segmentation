@@ -44,10 +44,11 @@ def wandb_config():
     # ENV
     if debug:
         config.epochs = 1
+        config.n_case = 10
     else:
         config.epochs = 30
     # n_case = 0 to run all cases
-    config.n_case = 16
+        config.n_case = 16
 
     config.save = False
     config.data_path = os.getenv('VIDA_PATH')
@@ -95,7 +96,7 @@ if __name__ == "__main__":
     #     loss_fn = nn.CrossEntropyLoss()
 
     # model = RecursiveUNet(num_classes=1,in_channels=1, activation=activation_layer)
-    model = ZUNet_v1()
+    model = ZUNet_v1(in_channels=3)
     model.to(config.device)
     # summary(model,(1,512,512),3)
 
