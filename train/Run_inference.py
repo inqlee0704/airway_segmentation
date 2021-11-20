@@ -8,6 +8,7 @@ from medpy.io import load,save
 
 # from UNet import RecursiveUNet
 from custom_UNet import UNet
+from ZUNet_v1 import ZUNet_v1
 import segmentation_models_pytorch as smp
 
 import time
@@ -59,13 +60,17 @@ infer_path = r"/data4/inqlee0704/ENV18PM_ProjSubjList_IN_Inference.in"
 # th=0.4, 0.9192
 # parameter_path = '/data1/inqlee0704/airway_segmentation/train/RESULTS/UNet_BCE_dice_ncase0_20210819/airway_UNet.pth'
 # th=0.3, 0.9166
-parameter_path = '/data1/inqlee0704/airway_segmentation/train/RESULTS/MultiC_UNet_20210921/airway_UNet_multiC.pth'
+# parameter_path = '/data1/inqlee0704/airway_segmentation/train/RESULTS/MultiC_UNet_20210921/airway_UNet_multiC.pth'
+parameter_path = '/data1/inqlee0704/airway_segmentation/train/RESULTS/ZUNet_v1_multiC_20210927/airway_UNet.pth'
+
 infer_list = pd.read_csv(infer_path,sep='\t')
 
 # Model
 # model = RecursiveUNet(num_classes=1, activation=nn.ReLU(inplace=True))
 # model = RecursiveUNet(num_classes=1, activation=nn.LeakyReLU(inplace=True))
-model = UNet(in_channel=3)
+# model = UNet(in_channel=1)
+# model = UNet(in_channel=3)
+model = ZUNet_v1(in_channels=3)
 model.load_state_dict(torch.load(parameter_path))
 DEVICE = 'cuda'
 model.to(DEVICE)
