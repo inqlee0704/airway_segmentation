@@ -176,6 +176,22 @@ class Segmentor:
                 pred_volume[:, :, i] = pred
             return pred_volume
 
+    def inference_multiC(self, img_volume):
+        # img_volume: [3,512,512,Z]
+        DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model.eval()
+        pred_volume = np.zeros(img_volume.shape[1:])
+        with torch.no_grad():
+            for i in range(img_volume.shape[-1]):
+                slice = img_volume[:, :, :, i]
+                slice = torch.from_numpy(slice).unsqueeze(0)
+                out = self.model(slice.to(DEVICE, dtype=torch.float))
+                # pred = torch.argmax(out, dim=1)
+                pred = torch.sigmoid(out)
+                pred = np.squeeze(pred.cpu().detach())
+                pred_volume[:, :, i] = pred
+            return pred_volume
+
 
 class Segmentor_Z:
     def __init__(

@@ -68,6 +68,11 @@ class SegDataset:
                     os.path.join(subj_path, "ZUNU_vida-lung.img.gz")
                     for subj_path in self.subj_paths
                 ]
+            elif mask_name == "vessel":
+                self.mask_paths = [
+                    os.path.join(subj_path, "ZUNU_vida-vessels.img.gz")
+                    for subj_path in self.subj_paths
+                ]
 
         self.slices = slices
         self.pat_num = None
@@ -97,6 +102,8 @@ class SegDataset:
             mask = self.mask[:, :, slc[1]]
             # Airway mask is stored as 255
             if self.mask_name == "airway":
+                mask = mask / 255
+            elif self.mask_name == "vessel":
                 mask = mask / 255
             elif self.mask_name == "lung":
                 mask[mask == 20] = 1
@@ -153,6 +160,11 @@ class SegDataset_Z:
                     os.path.join(subj_path, "ZUNU_vida-lung.img.gz")
                     for subj_path in self.subj_paths
                 ]
+            elif mask_name == "vessel":
+                self.mask_paths = [
+                    os.path.join(subj_path, "ZUNU_vida-vessels.img.gz")
+                    for subj_path in self.subj_paths
+                ]
 
         self.slices = slices
         self.pat_num = None
@@ -186,6 +198,8 @@ class SegDataset_Z:
             mask = self.mask[:, :, slc[1]]
             # Airway mask is stored as 255
             if self.mask_name == "airway":
+                mask = mask / 255
+            elif self.mask_name == "vessel":
                 mask = mask / 255
             elif self.mask_name == "lung":
                 mask[mask == 20] = 1
@@ -229,6 +243,11 @@ class SegDataset_multiC_withZ:
                 os.path.join(subj_path, "ZUNU_vida-lung.img.gz")
                 for subj_path in self.subj_paths
             ]
+        elif mask_name == "vessel":
+                self.mask_paths = [
+                    os.path.join(subj_path, "ZUNU_vida-vessels.img.gz")
+                    for subj_path in self.subj_paths
+                ]
         self.slices = slices
         self.pat_num = None
         self.img = None
@@ -266,6 +285,8 @@ class SegDataset_multiC_withZ:
             self.mask, _ = load(self.mask_paths[slc[0]])
             if self.mask_name == "airway":
                 self.mask = self.mask / 255
+            elif self.mask_name == "vessel":
+                mask = mask / 255
             elif self.mask_name == "lung":
                 self.mask[self.mask == 20] = 1
                 self.mask[self.mask == 30] = 1

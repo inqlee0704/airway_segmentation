@@ -48,7 +48,8 @@ def DCMtoVidaCT(pathImage,saveImage=None):
 
     i = 0
     for i in range(nImage):
-        pathDicom = pathImage + "/dicom"
+        # pathDicom = pathImage + "/dicom"
+        pathDicom = pathImage
         reader = sitk.ImageSeriesReader()
         filenamesDICOM = reader.GetGDCMSeriesFileNames(pathDicom)
         reader.SetFileNames(filenamesDICOM)

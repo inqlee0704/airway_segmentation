@@ -4,9 +4,9 @@
 # Run Time:
 # Ref:
 # ##############################################################################
-# 20210521, In Kyu Lee
-# Desc: 2D U-Net airway segmentation
-# combined VIDA segmenation + UNet segmentation
+# 20211210, In Kyu Lee
+# Desc: Ensemble 2D U-Net airway segmentation
+# model1 + model2
 # ##############################################################################
 # Input:
 #  - CT analyze file

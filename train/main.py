@@ -63,7 +63,8 @@ def wandb_config():
     config.name = run_name
     config.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    config.mask = 'airway'
+    # config.mask = 'airway'
+    config.mask = 'vessel'
     # config.mask = "lung"
     config.model = "UNet"
     config.activation = "leakyrelu"
