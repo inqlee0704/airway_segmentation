@@ -190,7 +190,7 @@ class Segmentor:
                 pred = torch.sigmoid(out)
                 pred = np.squeeze(pred.cpu().detach())
                 pred_volume[:, :, i] = pred
-            return pred_volume
+            return np.array(pred_volume)
 
 
 class Segmentor_Z:
